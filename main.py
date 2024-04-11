@@ -20,8 +20,13 @@ BUFFER_SIZE = 512 ## of 2 byte samples
 #/u/ -> (290, 1400)
 #/aw/ -> (300, 1000)
 
-F2_RANGE = (900, 2600)
-F1_RANGE = (200, 600)
+#/i/ -> (200, 2700)
+#/a/ -> (650, 1600)
+#/u/ -> (220, 550)
+#/aw/ -> (200, 800)
+
+F2_RANGE = (500, 2800)
+F1_RANGE = (100, 800)
 visualizer = FormantTracker(800, 800, F2_RANGE, F1_RANGE)
 f1_smoother = deque(maxlen=20)
 f2_smoother = deque(maxlen=20)
@@ -58,11 +63,11 @@ def handle_exit(arg1, arg2):
 
     f1_stats = np.quantile(np.array(f1_history).astype(np.int32) , [0,0.25, 0.5, 0.75,1])
     f2_stats = np.quantile(np.array(f2_history).astype(np.int32) , [0,0.25, 0.5, 0.75,1])
-    f3_stats = np.quantile(np.array(f3_history).astype(np.int32) , [0,0.25, 0.5, 0.75,1])
+    # f3_stats = np.quantile(np.array(f3_history).astype(np.int32) , [0,0.25, 0.5, 0.75,1])
 
     print(f"{f1_stats}")    
     print(f"{f2_stats}")
-    print(f"{f3_stats}")
+    # print(f"{f3_stats}")
 
     visualizer.destroy()
     audio_stream.stop_stream()
@@ -75,7 +80,7 @@ signal.signal(signal.SIGINT, handle_exit)
 
 audio_stream.start_stream()
 sample = -1
-alpha = 0.9
+alpha = 0.3
 
 
 
@@ -96,7 +101,7 @@ while True:
     samples = np.append(samples[0], samples[1:] - alpha * samples[:-1])
 
     #one per 1000hz sampling rate
-    samples_lpc = librosa.lpc(y=samples, order=10)
+    samples_lpc = librosa.lpc(y=samples, order=11)
 
     # Find the roots of the LPC coefficients
     roots = np.roots(samples_lpc)
@@ -114,6 +119,11 @@ while True:
     if formants[0] == 0:
         formants[0] = formants[1]
         formants[1] = formants[2]
+        formants[2] = formants[3]
+
+        if formants[0] == 0:
+            formants[0] = formants[1]
+            formants[1] = formants[2]
 
     f1, f2 = formants[0], formants[1]
 
@@ -123,6 +133,9 @@ while True:
     f1 = np.median(f1_smoother)
     f2 = np.median(f2_smoother)
     
+    f1_history.append(f1)
+    f2_history.append(f2)
+
     print(f"f1: {int(f1)} f2: {int(f2)}")
 
 
