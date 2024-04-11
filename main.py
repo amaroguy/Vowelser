@@ -12,7 +12,7 @@ from collections import deque
 #We'll be taking in about .1 seconds of data every time we do LPC w/2048 samples
 #because of the 2048 / sampling rate
 SAMPLING_RATE = 11025
-BUFFER_SIZE = 512 ## of 2 byte samples
+BUFFER_SIZE = 1024 ## of 2 byte samples
 
 
 #/i/ -> (200, 2500)
@@ -80,7 +80,7 @@ signal.signal(signal.SIGINT, handle_exit)
 
 audio_stream.start_stream()
 sample = -1
-alpha = 0.3
+alpha = 0.4
 
 
 
