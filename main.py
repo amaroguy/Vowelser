@@ -80,7 +80,7 @@ signal.signal(signal.SIGINT, handle_exit)
 
 audio_stream.start_stream()
 sample = -1
-alpha = 0.4
+alpha = 0.5
 
 
 
