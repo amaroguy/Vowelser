@@ -6,13 +6,27 @@ import librosa
 import pygame
 from visualize import FormantTracker
 import statistics
+from collections import deque
 
 #pyaudio setup
 #We'll be taking in about .1 seconds of data every time we do LPC w/2048 samples
 #because of the 2048 / sampling rate
-SAMPLING_RATE = 44100
-BUFFER_SIZE = 1024 ## of 2 byte samples
-visualizer = FormantTracker(800, 800, (600, 2400), (200,1000))
+SAMPLING_RATE = 11025
+BUFFER_SIZE = 512 ## of 2 byte samples
+
+
+#/i/ -> (200, 2500)
+#/a/ -> (480, 1600)
+#/u/ -> (290, 1400)
+#/aw/ -> (300, 1000)
+
+F2_RANGE = (900, 2600)
+F1_RANGE = (200, 600)
+visualizer = FormantTracker(800, 800, F2_RANGE, F1_RANGE)
+f1_smoother = deque(maxlen=20)
+f2_smoother = deque(maxlen=20)
+
+
 
 #https://en.wikipedia.org/wiki/Formant#/media/File:Average_vowel_formants_F1_F2.png
 #Median
@@ -82,7 +96,7 @@ while True:
     samples = np.append(samples[0], samples[1:] - alpha * samples[:-1])
 
     #one per 1000hz sampling rate
-    samples_lpc = librosa.lpc(y=samples, order=44)
+    samples_lpc = librosa.lpc(y=samples, order=10)
 
     # Find the roots of the LPC coefficients
     roots = np.roots(samples_lpc)
@@ -96,13 +110,22 @@ while True:
 
     ##something fishy going on here
     formants = sorted(ang_freq * (SAMPLING_RATE / (2 * np.pi)))
-    f1, f2, f3, f4 = formants[:4]
-    f1_history.append(f1) 
-    f2_history.append(f2)
-    f3_history.append(f3)
-    print(f"f1: {int(f1)} f2: {int(f2)}, f3: {int(f3)} f4: {f4}")
+
+    if formants[0] == 0:
+        formants[0] = formants[1]
+        formants[1] = formants[2]
+
+    f1, f2 = formants[0], formants[1]
+
+    f1_smoother.append(f1)
+    f2_smoother.append(f2)
+
+    f1 = np.median(f1_smoother)
+    f2 = np.median(f2_smoother)
+    
+    print(f"f1: {int(f1)} f2: {int(f2)}")
 
 
-    visualizer.draw_formant(f3, f2)
+    visualizer.draw_formant(f2, f1)
 
     
