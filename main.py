@@ -11,8 +11,8 @@ from collections import deque
 #pyaudio setup
 #We'll be taking in about .1 seconds of data every time we do LPC w/2048 samples
 #because of the 2048 / sampling rate
-SAMPLING_RATE = 11025
-BUFFER_SIZE = 1024 ## of 2 byte samples
+SAMPLING_RATE = 44100
+BUFFER_SIZE = 4096 ## of 2 byte samples
 
 
 #/i/ -> (200, 2500)
@@ -98,10 +98,12 @@ while True:
     #https://stackoverflow.com/questions/61519826/how-to-decide-filter-order-in-linear-prediction-coefficients-lpc-while-calcu
     
     #pre-emph
-    samples = np.append(samples[0], samples[1:] - alpha * samples[:-1])
+    # samples = np.append(samples[0], samples[1:] - alpha * samples[:-1])
+    hamming = np.hamming(len(samples))
+    samples = samples * hamming
 
     #one per 1000hz sampling rate
-    samples_lpc = librosa.lpc(y=samples, order=11)
+    samples_lpc = librosa.lpc(y=samples, order=44)
 
     # Find the roots of the LPC coefficients
     roots = np.roots(samples_lpc)
