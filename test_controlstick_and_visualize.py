@@ -8,6 +8,23 @@ from visualize import FormantTracker
 import statistics
 from collections import deque
 
+# This file visualizes the control stick/formant tracking and
+# is also used to calibrate the control stick. I used this script for
+# example to: 
+#
+# 1. start going /i/ before running it, and starting the script
+# 2. keep going /i/ for ~5 seconds
+# 3. halting the script and seeing the average f1/f2 that gets printed out
+# 
+# I rounded each of the recorded values DOWN to the nearest 100, and expanded the "radius"
+# by about 100. 
+# 
+# I double checked the formants aligned with what Praat measured for the formants as well
+# if they did not align with what Praat said, I fiddled with the number of LPC coefficients
+# or with the BUFFER_SIZE for how much information was given to perform LPC.
+
+
+
 #pyaudio setup
 #We'll be taking in about .1 seconds of data every time we do LPC w/2048 samples
 #because of the 2048 / sampling rate
@@ -34,12 +51,6 @@ f2_smoother = deque(maxlen=20)
 
 
 #https://en.wikipedia.org/wiki/Formant#/media/File:Average_vowel_formants_F1_F2.png
-#Median
-# /i/ - f1: 200
-# /a/ - f1: 700
-
-# .25 for f2
-# median for f1?
 
 pyaud = pyaudio.PyAudio()
 audio_stream = pyaud.open(
@@ -51,8 +62,6 @@ audio_stream = pyaud.open(
     input_device_index=0,
     frames_per_buffer=BUFFER_SIZE 
 )
-
-#handle ctrl c
 
 f1_history = []
 f2_history = []
@@ -112,10 +121,7 @@ while True:
     # Angular frequency
     ang_freq = np.angle(roots)
 
-    # Convert from rad/sample to Hz
-    #idea: if f1 > 0 and f2 > 0?
 
-    ##something fishy going on here
     formants = sorted(ang_freq * (SAMPLING_RATE / (2 * np.pi)))
 
     if formants[0] == 0:

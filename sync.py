@@ -1,6 +1,11 @@
 import time 
 import vgamepad as vg
 
+# This script allows for easy setup of the controller on an emulator
+# It'll print "Pressing A in {SLEEP_TIME} seconds", and press the button,
+# allowing you to switch to the emulator and have it listen for a controller
+# input.
+
 gamepad = vg.VX360Gamepad()
 gamepad.reset()
 gamepad.update()

@@ -1,3 +1,4 @@
 data/*
 testset/*
 *.pth
+__pycache__
