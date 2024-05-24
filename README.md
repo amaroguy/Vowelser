@@ -94,3 +94,7 @@ I originally tried using Deep Learning for this project, which failed miserably.
 ## ./lpc_examples_generator.ipynb
 
 Used to generate the visualizations used in the final project writeup.
+
+## Further Resources
+
+[Here is the dataset I built and used to train the button recognizer](https://drive.google.com/file/d/196lXC4Fqgi7Yef7qSf6ER8zYXaTj0Aw5/view?usp=sharing)
